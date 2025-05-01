@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: edutech
+  datasource:
+    url: "jdbc:postgresql://ep-twilight-fog-a1l3s2hp-pooler.ap-southeast-1.aws.neon.tech/edutechdb?sslmode=require"
+    username: neondb_owner
+    password: npg_OihqepFY1nV8
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+server:
+  port: 8080
