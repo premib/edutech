@@ -5,6 +5,7 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -16,19 +17,20 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @MappedSuperclass
+@SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
 public abstract class Audit {
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    protected LocalDateTime createdAt;
 
     @LastModifiedDate
-    private LocalDateTime modifiedAt;
+    protected LocalDateTime modifiedAt;
 
     @CreatedBy
     @Column(updatable = false)
-    private String createdBy;
+    protected String createdBy;
 
     @LastModifiedBy
-    private String modifiedBy;
+    protected String modifiedBy;
 }

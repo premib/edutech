@@ -4,27 +4,37 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import com.nameless.edutech.models.embeddable.Address;
+import lombok.experimental.SuperBuilder;
+
+import java.time.LocalDate;
+import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@SuperBuilder
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Human extends Audit {
     @Id
-    private long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false, updatable = false)
+    protected long id;
 
-    private String firstName;
+    @Column(length = 50, nullable = false)
+    protected String firstName;
 
-    private String lastName;
+    @Column(length = 50, nullable = false)
+    protected String lastName;
 
     @Column(unique = true)
-    private String email;
+    protected String email;
 
-    private String phone;
+    protected String phone;
 
-    @ManyToOne
-    @JoinColumn(name = "address_id")
-    private Address address;
+    protected LocalDate dob;
+
+    @Embedded
+    protected Address address;
 }

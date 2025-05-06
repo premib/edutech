@@ -59,17 +59,21 @@ public class StaffServiceImpl implements StaffService {
     }
 
     private StaffDTO convertToDTO(Staff staff) {
-        return new StaffDTO(staff.getId(), staff.getFirstName(), staff.getLastName(), staff.getDob(), staff.getPhotoUrl());
+        return new StaffDTO(
+                staff.getId(),
+                staff.getFirstName(),
+                staff.getLastName(),
+                staff.getDob(),
+                staff.getPhotoUrl()
+        );
     }
 
-    private Staff convertToEntity(StaffDTO staffDTO) {
-        Staff staff = new Staff();
-        
-        staff.setFirstName(staffDTO.firstName());
-        staff.setLastName(staffDTO.lastName());
-        staff.setDob(staffDTO.dob());
-        staff.setPhotoUrl(staffDTO.photoUrl());
-
-        return staff;
+    private Staff convertToEntity(StaffDTO dto) {
+        return Staff.builder()
+                .firstName(dto.firstName())
+                .lastName(dto.lastName())
+                .dob(dto.dob())
+                .photoUrl(dto.photoUrl())
+                .build();
     }
 }

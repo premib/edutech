@@ -58,16 +58,21 @@ public class PupilServiceImpl implements PupilService {
     }
 
     private PupilDTO convertToDTO(Pupil pupil) {
-        return new PupilDTO(pupil.getId(), pupil.getFirstName(), pupil.getLastName(), pupil.getDob(), pupil.getClassroom());
+        return new PupilDTO(
+                pupil.getId(),
+                pupil.getFirstName(),
+                pupil.getLastName(),
+                pupil.getDob(),
+                pupil.getClassroom()
+        );
     }
 
-    private Pupil convertToEntity(PupilDTO pupilDTO) {
-        Pupil pupil = new Pupil();
-        pupil.setFirstName(pupilDTO.firstName());
-        pupil.setLastName(pupilDTO.lastName());
-        pupil.setDob(pupilDTO.dob());
-        pupil.setClassroom(pupilDTO.classroom());
-
-        return pupil;
+    private Pupil convertToEntity(PupilDTO dto) {
+        return Pupil.builder()
+                    .firstName(dto.firstName())
+                    .lastName(dto.lastName())
+                    .dob(dto.dob())
+                    .classroom(dto.classroom())
+                    .build();
     }
 }

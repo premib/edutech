@@ -4,25 +4,20 @@ import com.nameless.edutech.models.base.Human;
 import com.nameless.edutech.models.embeddable.Address;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @EqualsAndHashCode(callSuper=true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@SuperBuilder
 @Entity
 public class Staff extends Human {
-    @Column(nullable = false, length = 50)
-    private String firstName;
 
-    @Column(nullable = false, length = 50)
-    private String lastName;
-
-    private Date dob;
-
-    @Embedded
-    private Address address;
+    private String role;
 
     @Column(columnDefinition = "TEXT")
     private String photoUrl;

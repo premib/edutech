@@ -57,16 +57,18 @@ public class ClassroomServiceImpl implements ClassroomService {
     }
 
     private ClassroomDTO convertToDTO(Classroom classroom) {
-        return new ClassroomDTO(classroom.getId(), classroom.getClassNumber(), classroom.getSection(), classroom.getInchargeStaff());
+        return new ClassroomDTO(
+                classroom.getId(),
+                classroom.getClassNumber(),
+                classroom.getSection(),
+                classroom.getInchargeStaff()
+        );
     }
 
-    private Classroom convertToEntity(ClassroomDTO classroomDTO) {
-        Classroom classroom = new Classroom();
-
-        classroom.setClassNumber(classroomDTO.classNumber());
-        classroom.setSection(classroomDTO.section());
-        classroom.setInchargeStaff(classroomDTO.inchargeStaff());
-
-        return classroom;
+    private Classroom convertToEntity(ClassroomDTO dto) {
+        return Classroom.builder()
+                .classNumber(dto.classNumber())
+                .section(dto.section())
+                .inchargeStaff(dto.inchargeStaff()).build();
     }
 }

@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Embeddable
 public class Address {
-    private int id;
-
     private String address;
 
     private String city;

@@ -2,12 +2,13 @@ package com.nameless.edutech.models.DTO;
 
 import com.nameless.edutech.models.Classroom;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public record PupilDTO(
         Long id,
         String firstName,
         String lastName,
-        Date dob,
+        LocalDate dob,
         Classroom classroom
 ) {}
