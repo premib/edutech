@@ -24,28 +24,28 @@ public class StaffController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StaffDTO> getProductById(@PathVariable Long id) {
-        Optional<StaffDTO> product = staffService.getStaffById(id);
-        return product.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<StaffDTO> getStaffById(@PathVariable Long id) {
+        Optional<StaffDTO> staff = staffService.getStaffById(id);
+        return staff.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public StaffDTO createProduct(@RequestBody StaffDTO staffDTO) {
+    public StaffDTO createStaff(@RequestBody StaffDTO staffDTO) {
         return staffService.saveStaff(staffDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StaffDTO> updateProduct(@PathVariable Long id, @RequestBody StaffDTO staffDTO) {
+    public ResponseEntity<StaffDTO> updateStaff(@PathVariable Long id, @RequestBody StaffDTO staffDTO) {
         try {
-            StaffDTO updatedProduct = staffService.updateStaff(id, staffDTO);
-            return ResponseEntity.ok(updatedProduct);
+            StaffDTO updatedStaff = staffService.updateStaff(id, staffDTO);
+            return ResponseEntity.ok(updatedStaff);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteStaff(@PathVariable Long id) {
         staffService.deleteStaff(id);
         return ResponseEntity.noContent().build();
     }
