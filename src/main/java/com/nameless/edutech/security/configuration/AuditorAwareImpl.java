@@ -1,16 +1,13 @@
-package com.nameless.edutech.security;
+package com.nameless.edutech.security.configuration;
 
-import com.nameless.edutech.models.User;
 import com.nameless.edutech.security.models.UserPrincipal;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.lang.NonNullApi;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 @Component
 public class AuditorAwareImpl implements AuditorAware<String> {
