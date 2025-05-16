@@ -1,4 +1,5 @@
-package com.nameless.edutech.models.DTO;
+package com.nameless.edutech.DTO.User;
+
 
 public record LoginResponse(
         String token,

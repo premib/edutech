@@ -1,7 +1,8 @@
 package com.nameless.edutech.controllers;
 
 
-import com.nameless.edutech.models.DTO.ClassroomDTO;
+import com.nameless.edutech.DTO.Classroom.ClassroomRequest;
+import com.nameless.edutech.DTO.Classroom.ClassroomResponse;
 import com.nameless.edutech.services.ClassroomService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,25 +21,25 @@ public class ClassroomController {
     }
 
     @GetMapping
-    public List<ClassroomDTO> getAllClass() {
+    public List<ClassroomResponse> getAllClass() {
         return classroomService.getAllClassroom();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ClassroomDTO> getClassById(@PathVariable int id) {
-        Optional<ClassroomDTO> aClass = classroomService.getClassroomById(id);
+    public ResponseEntity<ClassroomResponse> getClassById(@PathVariable int id) {
+        Optional<ClassroomResponse> aClass = classroomService.getClassroomById(id);
         return aClass.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ClassroomDTO createClass(@RequestBody ClassroomDTO classroomDTO) {
-        return classroomService.saveClassroom(classroomDTO);
+    public ClassroomResponse createClass(@RequestBody ClassroomRequest classroomRequest) {
+        return classroomService.saveClassroom(classroomRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClassroomDTO> updateClass(@PathVariable int id, @RequestBody ClassroomDTO classroomDTO) {
+    public ResponseEntity<ClassroomResponse> updateClass(@PathVariable int id, @RequestBody ClassroomRequest classroomRequest) {
         try {
-            ClassroomDTO updatedClass = classroomService.updateClassroom(id, classroomDTO);
+            ClassroomResponse updatedClass = classroomService.updateClassroom(id, classroomRequest);
             return ResponseEntity.ok(updatedClass);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

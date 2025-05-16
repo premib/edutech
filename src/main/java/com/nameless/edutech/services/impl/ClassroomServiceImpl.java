@@ -1,8 +1,12 @@
 package com.nameless.edutech.services.impl;
 
+import com.nameless.edutech.DTO.Classroom.ClassroomResponse;
+import com.nameless.edutech.mappers.ClassroomMapper;
 import com.nameless.edutech.models.Classroom;
-import com.nameless.edutech.models.DTO.ClassroomDTO;
+import com.nameless.edutech.DTO.Classroom.ClassroomRequest;
+import com.nameless.edutech.models.base.Staff;
 import com.nameless.edutech.repositories.ClassroomRepository;
+import com.nameless.edutech.repositories.StaffRepository;
 import com.nameless.edutech.services.ClassroomService;
 import org.springframework.stereotype.Service;
 
@@ -15,60 +19,56 @@ public class ClassroomServiceImpl implements ClassroomService {
 
     private final ClassroomRepository classroomRepository;
 
-    public ClassroomServiceImpl(ClassroomRepository classroomRepository) {
+    private final StaffRepository staffRepository;
+
+    private final ClassroomMapper classroomMapper;
+
+    public ClassroomServiceImpl(ClassroomRepository classroomRepository, StaffRepository staffRepository,
+                                ClassroomMapper classroomMapper) {
         this.classroomRepository = classroomRepository;
+        this.staffRepository = staffRepository;
+        this.classroomMapper = classroomMapper;
     }
 
     @Override
-    public List<ClassroomDTO> getAllClassroom() {
+    public List<ClassroomResponse> getAllClassroom() {
         return this.classroomRepository.findAll().stream()
-                .map(this::convertToDTO)
+                .map(classroomMapper::toClassroomResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<ClassroomDTO> getClassroomById(int id) {
-        return classroomRepository.findById(id).map(this::convertToDTO);
+    public Optional<ClassroomResponse> getClassroomById(int id) {
+        return classroomRepository.findById(id).map(classroomMapper::toClassroomResponse);
     }
 
     @Override
-    public ClassroomDTO saveClassroom(ClassroomDTO classroomDTO) {
-        Classroom classroom = convertToEntity(classroomDTO);
+    public ClassroomResponse saveClassroom(ClassroomRequest classroomRequest) {
+        Classroom classroom = classroomMapper.toClassroom(classroomRequest);
         Classroom savedClassroom = classroomRepository.save(classroom);
 
-        return convertToDTO(savedClassroom);
+        return classroomMapper.toClassroomResponse(savedClassroom);
     }
 
     @Override
-    public ClassroomDTO updateClassroom(int id, ClassroomDTO classroomDTO) {
+    public ClassroomResponse updateClassroom(int id, ClassroomRequest classroomRequest) {
         Classroom classroom = classroomRepository.findById(id).orElseThrow();
 
-        classroom.setClassNumber(classroomDTO.classNumber());
-        classroom.setSection(classroomDTO.section());
-        classroom.setInchargeStaff(classroomDTO.inchargeStaff());
+        classroom.setClassNumber(classroomRequest.getClassNumber());
+        classroom.setSection(classroomRequest.getSection());
+
+        long existingStaffId = classroom.getInchargeStaff().getId();
+        if (existingStaffId != classroomRequest.getInchargeStaffId()) {
+            Staff staff = staffRepository.findById(existingStaffId).orElseThrow();
+            classroom.setInchargeStaff(staff);
+        }
 
         Classroom updatedClassroom = classroomRepository.save(classroom);
-        return convertToDTO(updatedClassroom);
+        return classroomMapper.toClassroomResponse(updatedClassroom);
     }
 
     @Override
     public void deleteClassroom(int id) {
         classroomRepository.deleteById(id);
-    }
-
-    private ClassroomDTO convertToDTO(Classroom classroom) {
-        return new ClassroomDTO(
-                classroom.getId(),
-                classroom.getClassNumber(),
-                classroom.getSection(),
-                classroom.getInchargeStaff()
-        );
-    }
-
-    private Classroom convertToEntity(ClassroomDTO dto) {
-        return Classroom.builder()
-                .classNumber(dto.classNumber())
-                .section(dto.section())
-                .inchargeStaff(dto.inchargeStaff()).build();
     }
 }

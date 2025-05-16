@@ -1,7 +1,8 @@
 package com.nameless.edutech.controllers;
 
-import com.nameless.edutech.models.DTO.LoginResponse;
-import com.nameless.edutech.models.DTO.UserDTO;
+import com.nameless.edutech.DTO.User.LoginRequest;
+import com.nameless.edutech.DTO.User.LoginResponse;
+import com.nameless.edutech.DTO.User.UserDTO;
 import com.nameless.edutech.services.UserService;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -39,12 +40,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody UserDTO userDTO) {
-        String token = userService. login(userDTO);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest userDTO) {
+        String token = userService.login(userDTO);
 
         if (token != null) {
             return new ResponseEntity<>(new LoginResponse(token, null), HttpStatus.OK);
         }
+
 
         return new ResponseEntity<>(new LoginResponse(null, "Unauthorized Login"), HttpStatus.UNAUTHORIZED);
     }

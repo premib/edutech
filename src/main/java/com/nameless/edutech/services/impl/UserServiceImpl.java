@@ -1,6 +1,7 @@
 package com.nameless.edutech.services.impl;
 
-import com.nameless.edutech.models.DTO.UserDTO;
+import com.nameless.edutech.DTO.User.LoginRequest;
+import com.nameless.edutech.DTO.User.UserDTO;
 import com.nameless.edutech.models.User;
 import com.nameless.edutech.repositories.UserRepository;
 import com.nameless.edutech.security.services.JWTService;
@@ -60,12 +61,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(UserDTO userDTO) {
+    public String login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager
-                .authenticate(new UsernamePasswordAuthenticationToken(userDTO.username(), userDTO.password()));
+                .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 
         if (authentication.isAuthenticated())
-            return jwtService.generateJWT(userDTO.username());
+            return jwtService.generateJWT(loginRequest.username());
 
         return null;
     }

@@ -1,6 +1,7 @@
 package com.nameless.edutech.controllers;
 
-import com.nameless.edutech.models.DTO.StaffDTO;
+import com.nameless.edutech.DTO.Staff.StaffRequest;
+import com.nameless.edutech.DTO.Staff.StaffResponse;
 import com.nameless.edutech.services.StaffService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,25 +20,25 @@ public class StaffController {
     }
 
     @GetMapping
-    public List<StaffDTO> getAllStaffs() {
+    public List<StaffResponse> getAllStaffs() {
         return staffService.getAllStaffs();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StaffDTO> getStaffById(@PathVariable Long id) {
-        Optional<StaffDTO> staff = staffService.getStaffById(id);
+    public ResponseEntity<StaffResponse> getStaffById(@PathVariable Long id) {
+        Optional<StaffResponse> staff = staffService.getStaffById(id);
         return staff.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public StaffDTO createStaff(@RequestBody StaffDTO staffDTO) {
-        return staffService.saveStaff(staffDTO);
+    public StaffResponse createStaff(@RequestBody StaffRequest staffRequest) {
+        return staffService.saveStaff(staffRequest);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StaffDTO> updateStaff(@PathVariable Long id, @RequestBody StaffDTO staffDTO) {
+    public ResponseEntity<StaffResponse> updateStaff(@PathVariable Long id, @RequestBody StaffRequest staffRequest) {
         try {
-            StaffDTO updatedStaff = staffService.updateStaff(id, staffDTO);
+            StaffResponse updatedStaff = staffService.updateStaff(id, staffRequest);
             return ResponseEntity.ok(updatedStaff);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();

@@ -1,14 +1,15 @@
-package com.nameless.edutech.models.DTO;
+package com.nameless.edutech.DTO;
 
 import com.nameless.edutech.models.Classroom;
+import com.nameless.edutech.models.embeddable.Contact;
 
 import java.time.LocalDate;
-import java.util.Date;
 
-public record PupilDTO(
+public record StudentDTO(
         Long id,
         String firstName,
         String lastName,
         LocalDate dob,
-        Classroom classroom
+        Classroom classroom,
+        Contact contact
 ) {}

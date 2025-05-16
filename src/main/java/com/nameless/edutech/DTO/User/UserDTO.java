@@ -1,6 +1,6 @@
-package com.nameless.edutech.models.DTO;
+package com.nameless.edutech.DTO.User;
 
-import com.nameless.edutech.models.Staff;
+import com.nameless.edutech.models.base.Staff;
 import com.nameless.edutech.models.enums.Theme;
 
 public record UserDTO(

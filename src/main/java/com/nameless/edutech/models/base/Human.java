@@ -3,11 +3,10 @@ package com.nameless.edutech.models.base;
 import jakarta.persistence.*;
 import lombok.*;
 
-import com.nameless.edutech.models.embeddable.Address;
+import com.nameless.edutech.models.embeddable.Contact;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -20,21 +19,24 @@ public abstract class Human extends Audit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false)
-    protected long id;
+    private long id;
 
     @Column(length = 50, nullable = false)
-    protected String firstName;
+    private String firstName;
 
     @Column(length = 50, nullable = false)
-    protected String lastName;
+    private String lastName;
 
-    @Column(unique = true)
-    protected String email;
-
-    protected String phone;
-
-    protected LocalDate dob;
+    private LocalDate dob;
 
     @Embedded
-    protected Address address;
+    private Contact contact;
+
+    private String gender;
+
+    @Column(columnDefinition = "TEXT")
+    private String photoUrl;
+
+    @Column(length = 5)
+    private String bloodType;
 }

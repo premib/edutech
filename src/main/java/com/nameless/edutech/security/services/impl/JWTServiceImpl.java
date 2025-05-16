@@ -1,5 +1,6 @@
 package com.nameless.edutech.security.services.impl;
 
+import com.nameless.edutech.security.configuration.JwtProperties;
 import com.nameless.edutech.security.services.JWTService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,9 +19,12 @@ import java.util.function.Function;
 @Service
 public class JWTServiceImpl implements JWTService {
 
+    private final JwtProperties jwtProperties;
+
     private Key secretKey;
 
-    public JWTServiceImpl() {
+    public JWTServiceImpl(JwtProperties jwtProperties) {
+        this.jwtProperties = jwtProperties;
         try {
             secretKey = KeyGenerator.getInstance("HmacSHA256").generateKey();
         } catch (NoSuchAlgorithmException e) {
@@ -33,7 +37,6 @@ public class JWTServiceImpl implements JWTService {
      */
     @Override
     public String generateJWT(String subject) {
-
         Map<String, Object> claims = new HashMap<>();
 
         return Jwts.builder()
@@ -41,7 +44,7 @@ public class JWTServiceImpl implements JWTService {
                 .add(claims)
                 .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .expiration(new Date(System.currentTimeMillis() + Long.parseLong(jwtProperties.getExpiration())))
                 .and()
                 .signWith(getKey())
                 .compact();
