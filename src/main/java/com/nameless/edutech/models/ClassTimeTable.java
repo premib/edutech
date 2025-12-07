@@ -27,5 +27,9 @@ public class ClassTimeTable {
 
     @OneToMany
     @JoinColumn(name = "period_id")
-    private List<ClassPeriodInformation> periods;
+    private List<Period> period;
+
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
 }

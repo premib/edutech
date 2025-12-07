@@ -14,9 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -36,9 +34,20 @@ public class DataInitializer implements CommandLineRunner {
     private static final List<String> BLOOD_TYPES = List.of(
             "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
     );
-    private static final List<String> ROLES = List.of("teacher", "coordinator", "driver", "kitchen");
+    private static final List<String> ROLES = List.of(
+            "driver", "kitchen", "nurse", "coach", "counsellor", "registrar", "librarian"
+    );
+    private static final String TEACHER = "teacher";
+    private static final String STUDENT = "student";
+    public static final String CO_ORDINATOR = "co_ordinator";
+    public static final String PRINCIPAL = "principal";
+
+    private static final List<String> TEACHER_ROLES = List.of(
+            TEACHER, CO_ORDINATOR, PRINCIPAL
+    );
     private static final List<ExternalHuman> EXTERNAL_HUMANS = new ArrayList<>();
     private final SubjectRepository subjectRepository;
+    private final TeacherRepository teacherRepository;
 
 
     public DataInitializer(StaffRepository staffRepository,
@@ -46,7 +55,7 @@ public class DataInitializer implements CommandLineRunner {
                            ClassroomRepository classroomRepository,
                            RoleRepository roleRepository,
                            ExternalHumanRepository externalHumanRepository,
-                           ModelMapper modelMapper, SubjectRepository subjectRepository) {
+                           ModelMapper modelMapper, SubjectRepository subjectRepository, TeacherRepository teacherRepository) {
         this.staffRepository = staffRepository;
         this.studentRepository = studentRepository;
         this.classroomRepository = classroomRepository;
@@ -54,6 +63,7 @@ public class DataInitializer implements CommandLineRunner {
         this.externalHumanRepository = externalHumanRepository;
         this.modelMapper = modelMapper;
         this.subjectRepository = subjectRepository;
+        this.teacherRepository = teacherRepository;
     }
 
     @Override
@@ -61,10 +71,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         createRoles();
         createSubjects();
-        createExternalHumans();
-        createClassrooms();
-        createStaffs();
-        createPupils();
+        createClassrooms(3, 2, 15);
     }
 
     List<Subject> allSubjects = new ArrayList<>();
@@ -77,17 +84,28 @@ public class DataInitializer implements CommandLineRunner {
             subject.setCode("schi-00" + i);
             subject.setDepartment("subject department " + i);
             allSubjects.add(subject);
-            subjectRepository.save(subject);
         }
+        subjectRepository.saveAll(allSubjects);
     }
 
     private void createRoles() {
+        List<Role> roles = new ArrayList<>();
+
         for (String roleName : ROLES) {
             Role role = new Role();
             role.setName(roleName);
             role.setDescription(roleName + " description");
-            roleRepository.save(role);
+            roles.add(role);
         }
+
+        for (String roleName : TEACHER_ROLES) {
+            Role role = new Role();
+            role.setName(roleName);
+            role.setDescription(roleName + " description");
+            roles.add(role);
+        }
+
+        roleRepository.saveAll(roles);
     }
 
     private Human createHuman(String firstname, int number) {
@@ -112,65 +130,154 @@ public class DataInitializer implements CommandLineRunner {
         return externalHuman;
     }
 
-    private void createExternalHumans() {
-        for (int i = 1; i <= 70; i++) {
+    private final List<ExternalHuman> allExternalHumans = new ArrayList<>();
+    private int assignedExternalHumans = 0;
+    private ExternalHuman getAssignedExternalHumans() {
+        if (assignedExternalHumans + 1 > allExternalHumans.size())
+            assignedExternalHumans = 0;
+
+        return allExternalHumans.get(assignedExternalHumans++);
+    }
+    private void createExternalHumans(int numberOfExternalHumans) {
+        for (int i = 1; i <= numberOfExternalHumans; i++) {
             ExternalHuman externalHuman = modelMapper.map(createHuman("external", i), ExternalHuman.class);
             EXTERNAL_HUMANS.add(externalHuman);
-            externalHumanRepository.save(externalHuman);
+            allExternalHumans.add(externalHuman);
         }
+        externalHumanRepository.saveAll(allExternalHumans);
     }
 
-    private void createClassrooms() {
-        for (int i = 1; i <= 3; i++) {
-            Classroom classroom = new Classroom();
-            classroom.setClassNumber("C" + i);
-            classroom.setSection("A");
-            classroomRepository.save(classroom);
+    private void createClassrooms(int numberOfClassrooms, int numberOfSections, int numberOfStudents) {
+        List<String> sections = List.of("A", "B", "C", "D", "E", "F");
+        List<Classroom> classrooms = new ArrayList<>();
+
+        for (int i = 1; i <= numberOfClassrooms; i++) {
+            for (int j = 0; j < numberOfSections; j++) {
+                Classroom classroom = new Classroom();
+                classroom.setClassNumber(String.valueOf(i));
+                classroom.setSection(sections.get(j));
+
+                classrooms.add(classroom);
+            }
         }
+        classroomRepository.saveAll(classrooms);
+
+        // principal + coordinators + teachers + students
+        // all have least 1 guardian
+        int totalStudents = (numberOfClassrooms * numberOfSections * numberOfStudents);
+        int numberOfExternalHumans = 1 + (numberOfClassrooms) + (numberOfClassrooms * numberOfSections)
+                + totalStudents;
+
+        createExternalHumans(numberOfExternalHumans);
+        createOtherStaffs();
+        assignTeachersToClass(classrooms, numberOfClassrooms);
+        populateStudentsToClassroom(classrooms, totalStudents);
     }
 
-    private void createStaffs() {
-        List<Classroom> classrooms = classroomRepository.findAll();
+    private Staff createStaff(String name, List<Role> roles, List<ExternalHuman> externalHumans, int i) {
+        Staff staff = modelMapper.map(createHuman(name, i), Staff.class);
+        staff.setRole(new ArrayList<>(List.of(roles.get(i % roles.size()))));
+        staff.setStaffGuardians(new ArrayList<>(Collections.singleton(externalHumans.get(new Random().nextInt(externalHumans.size())))));
+
+        return staff;
+    }
+
+    private void createOtherStaffs() {
         List<ExternalHuman> externalHumans = externalHumanRepository.findAll();
         List<Role> roles = roleRepository.findAll();
 
         for (int i = 1; i <= 10; i++) {
-            List<Classroom> availableClassrooms = classrooms.stream()
-                    .filter(classroom -> classroom.getInchargeStaff() == null).toList();
-
-            availableClassrooms.forEach(classroom -> {System.out.println("Classroom: " + classroom);});
-
-            Staff staff = modelMapper.map(createHuman("staff", i), Staff.class);
-            staff.setRole(List.of(roles.get(i % roles.size())));
-
-            if (staff.getRole().stream().anyMatch(role -> "teacher".equals(role.getName())) && !availableClassrooms.isEmpty()) {
-                Classroom classroom = availableClassrooms.get(i % availableClassrooms.size());
-                System.out.println("Setting classroom: " + classroom.getId() + ": " + staff.getId());
-                staff.setClassroom(classroom);
-                classroom.setInchargeStaff(staff);
-                classroomRepository.save(classroom);
-            }
-            staff.setStaffGuardians(List.of(externalHumans.get(new Random().nextInt(externalHumans.size()))));
+            Staff staff = createStaff("staff", roles, externalHumans, i);
+            staff.setStaffGuardians(new ArrayList<>(Collections.singleton(getAssignedExternalHumans())));
             staffRepository.save(staff);
         }
     }
 
-    private void createPupils() {
-        List<Classroom> classrooms = classroomRepository.findAll();
+    /**
+     * Populates classrooms with 1 teacher per class per available classroom
+     * Also, 1 principal and 1 coordinator per classNumber is also created
+     * coordinators are assigned to principal and teachers are assigned to their respective
+     * classNumber's coordinators
+     * @param classrooms - all classrooms available from the previous method
+     * @param numberOfClassrooms - number of classNumbers. eg: 5th, 6th, etc.
+     * @return
+     */
+    private void assignTeachersToClass(List<Classroom> classrooms, int numberOfClassrooms) {
         List<ExternalHuman> externalHumans = externalHumanRepository.findAll();
 
-        for (int i = 1; i <= 30; i++) {
-            Student student = modelMapper.map(createHuman("student", i), Student.class);
+        Role principalRole = roleRepository.getRoleByName(PRINCIPAL);
+        Role coordinatorRole = roleRepository.getRoleByName(CO_ORDINATOR);
+        Role teacherRole = roleRepository.getRoleByName(TEACHER);
+
+        Staff principal = modelMapper.map(createHuman(PRINCIPAL, 1), Teacher.class);
+        principal.setRole(new ArrayList<>(List.of(principalRole)));
+        principal.setStaffGuardians(new ArrayList<>(Collections.singleton(getAssignedExternalHumans())));
+
+        List<Staff> coordinators = new ArrayList<>();
+        for (int i = 1; i <= numberOfClassrooms; i++) {
+            Teacher coordinator = modelMapper.map(createHuman(CO_ORDINATOR, i), Teacher.class);
+            coordinator.setRole(new ArrayList<>(List.of(coordinatorRole)));
+            coordinator.setReportsTo(principal);
+            coordinators.add(coordinator);
+            coordinator.setStaffGuardians(new ArrayList<>(Collections.singleton(getAssignedExternalHumans())));
+            coordinator.setSubjects(new ArrayList<>(List.of(allSubjects.get(new Random().nextInt(allSubjects.size())))));
+        }
+
+        principal.setSubordinates(coordinators);
+        staffRepository.save(principal);
+        staffRepository.saveAll(coordinators);
+
+        List<Teacher> teachers = new ArrayList<>();
+        List<Classroom> updatedClassrooms = new ArrayList<>();
+        List<Staff> updatedCoordinators = new ArrayList<>();
+
+        for (int i = 0; i < classrooms.size(); i++) {
+            Teacher teacher = modelMapper.map(
+                    createStaff(TEACHER, List.of(teacherRole), externalHumans, i),
+                    Teacher.class
+            );
+
+            Classroom classroom = classrooms.get(i);
+            teacher.setClassroom(classroom);
+            classroom.setInchargeStaff(teacher);
+            updatedClassrooms.add(classroom);
+
+            int classNumber = Integer.parseInt(classroom.getClassNumber()) - 1;
+            Staff coordinator = coordinators.get(classNumber);
+            teacher.setReportsTo(coordinator);
+            teacher.setStaffGuardians(new ArrayList<>(Collections.singleton(getAssignedExternalHumans())));
+            teacher.setSubjects(new ArrayList<>(List.of(allSubjects.get(i % allSubjects.size()))));
+
+            if (coordinator.getSubordinates() != null) {
+                List<Staff> subordinates = coordinator.getSubordinates();
+                subordinates.add(teacher);
+                coordinator.setSubordinates(subordinates);
+            } else {
+                coordinator.setSubordinates(new ArrayList<>(Collections.singleton(teacher)));
+            }
+
+            updatedCoordinators.add(coordinator);
+            teachers.add(teacher);
+        }
+
+        classroomRepository.saveAll(updatedClassrooms);
+        staffRepository.saveAll(updatedCoordinators);
+        teacherRepository.saveAll(teachers);
+    }
+
+    private void populateStudentsToClassroom(List<Classroom> classrooms, int totalStudents) {
+        List<Student> students = new ArrayList<>();
+
+        for (int i = 1; i <= totalStudents; i++) {
+            Student student = modelMapper.map(createHuman(STUDENT, i), Student.class);
             student.setAdmissionNumber("ADM" + i);
-            student.setAdmissionDate(LocalDate.of(2020, 6, i));
+            student.setAdmissionDate(LocalDate.of(2020, 6,  ((i - 1) % 30) + 1));
             student.setRollNumber(i);
             student.setActivityStatus(ActivityStatus.ACTIVE);
             student.setClassroom(classrooms.get(i % classrooms.size()));
-            student.setStudentGuardians(List.of(
-                    externalHumans.get(new Random().nextInt(externalHumans.size())),
-                    externalHumans.get(new Random().nextInt(externalHumans.size()))
-            ));
-            studentRepository.save(student);
+            student.setStudentGuardians(new ArrayList<>(Collections.singleton(getAssignedExternalHumans())));
+            students.add(student);
         }
+        studentRepository.saveAll(students);
     }
 }

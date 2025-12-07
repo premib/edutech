@@ -33,4 +33,27 @@ public class Staff extends Human {
             inverseJoinColumns = @JoinColumn(name = "external_human_id")
     )
     private List<ExternalHuman> staffGuardians = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private Staff reportsTo;
+
+    @OneToMany(mappedBy = "reportsTo")
+    private List<Staff> subordinates = new ArrayList<>();
+
+    @PrePersist
+    @PreUpdate
+    private void validateReporting() {
+        if (this.reportsTo != null && this.reportsTo.equals(this)) {
+            throw new IllegalStateException("A staff member cannot report to themselves.");
+        }
+
+        if (this.subordinates != null) {
+            for (Staff subordinate : this.subordinates) {
+                if (subordinate.equals(this)) {
+                    throw new IllegalStateException("A staff member cannot report to themselves.");
+                }
+            }
+        }
+    }
 }

@@ -4,6 +4,7 @@ import com.nameless.edutech.models.base.Audit;
 import com.nameless.edutech.models.base.Staff;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
 
 import java.util.List;
 
@@ -24,14 +25,14 @@ public class Classroom extends Audit {
     @Column(length = 5)
     private String section;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "staff_id")
     private Staff inchargeStaff;
 
-    @OneToMany(mappedBy = "classroom")
+    @OneToMany(mappedBy = "classroom", fetch = FetchType.LAZY)
     private List<Student> students;
 
-    @OneToMany
+    @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "class_time_table_id")
     private List<ClassTimeTable> classTimeTable;
 }

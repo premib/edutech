@@ -31,5 +31,5 @@ public class Subject {
     private boolean active = true;
 
     @ManyToMany(mappedBy = "subjects")
-    private List<Staff> staffList;
+    private List<Teacher> staffList;
 }
